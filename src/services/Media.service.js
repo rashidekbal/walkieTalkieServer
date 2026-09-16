@@ -50,7 +50,9 @@ class MediaService {
         use_filename: true,
         unique_filename: true,
         preserve_filename: true,
-        filename_override: originalName
+        filename_override: originalName,
+        access_mode: 'public',
+        type: 'upload'
       };
 
       let result;

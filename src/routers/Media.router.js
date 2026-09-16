@@ -30,6 +30,7 @@ const upload = multer({
 });
 
 router.post('/upload', upload.single('file'), mediaController.uploadFile);
+router.get('/download', mediaController.downloadFile);
 
 module.exports = router;
 
