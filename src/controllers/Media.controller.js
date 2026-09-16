@@ -1,5 +1,6 @@
 const mediaService = require('../services/Media.service');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
+const { Readable } = require('stream');
 
 class MediaController {
   async uploadFile(req, res) {
@@ -24,7 +25,6 @@ class MediaController {
       const fileName = name || 'download';
 
       // IMPORTANT: fl_attachment is ONLY valid for /image/upload/ and /video/upload/ in Cloudinary.
-      // Applying fl_attachment to /raw/upload/ causes Cloudinary to return 400/404/401 errors.
       let targetUrl = url;
       if (targetUrl.includes('/image/upload/') && !targetUrl.includes('/fl_attachment')) {
         targetUrl = targetUrl.replace('/image/upload/', '/image/upload/fl_attachment/');
@@ -32,7 +32,6 @@ class MediaController {
 
       let response = await fetch(targetUrl);
       if (!response.ok && targetUrl !== url) {
-        // Fall back to exact original URL if fl_attachment failed
         response = await fetch(url);
       }
 
@@ -46,9 +45,14 @@ class MediaController {
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(safeFileName)}"; filename*=UTF-8''${encodeURIComponent(safeFileName)}`);
 
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      return res.send(buffer);
+      if (response.body && typeof Readable.fromWeb === 'function') {
+        const nodeStream = Readable.fromWeb(response.body);
+        return nodeStream.pipe(res);
+      } else {
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        return res.send(buffer);
+      }
     } catch (err) {
       return sendError(res, err.message, 500);
     }
