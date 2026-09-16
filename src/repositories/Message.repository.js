@@ -9,6 +9,7 @@ class MessageRepository {
     const {
       roomCode,
       senderName = 'Guest',
+      senderSocketId = null,
       type = 'text',
       content = '',
       mediaUrl = null,
@@ -19,12 +20,13 @@ class MessageRepository {
     try {
       const sql = `
         INSERT INTO walkietalkie_messages 
-        (room_code, sender_name, type, content, media_url, media_public_id, file_name, file_size, mime_type)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (room_code, sender_name, sender_socket_id, type, content, media_url, media_public_id, file_name, file_size, mime_type)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
       const [result] = await pool.execute(sql, [
         roomCode,
         senderName,
+        senderSocketId,
         type,
         content,
         mediaUrl,
@@ -38,6 +40,8 @@ class MessageRepository {
         id: result.insertId,
         room_code: roomCode,
         sender_name: senderName,
+        sender_socket_id: senderSocketId,
+        senderSocketId: senderSocketId,
         type,
         content,
         media_url: mediaUrl,
@@ -52,6 +56,8 @@ class MessageRepository {
         id: Date.now() + Math.random(),
         room_code: roomCode,
         sender_name: senderName,
+        sender_socket_id: senderSocketId,
+        senderSocketId: senderSocketId,
         type,
         content,
         media_url: mediaUrl,

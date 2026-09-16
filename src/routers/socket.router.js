@@ -17,6 +17,7 @@ function setupSocketRouter(io) {
 
         socket.to(roomCode).emit('user_joined', {
           senderName: socket.senderName,
+          senderSocketId: socket.id,
           timestamp: new Date()
         });
       } catch (err) {
@@ -31,12 +32,17 @@ function setupSocketRouter(io) {
         const message = await messageService.sendMessage({
           roomCode,
           senderName: senderName || socket.senderName || 'Guest',
+          senderSocketId: socket.id,
           content,
           type,
           mediaUrl,
           mediaPublicId,
           fileMeta
         });
+
+        // Guarantee senderSocketId is attached to emitted message
+        message.senderSocketId = socket.id;
+        message.sender_socket_id = socket.id;
 
         io.to(roomCode).emit('new_message', message);
       } catch (err) {
@@ -45,13 +51,18 @@ function setupSocketRouter(io) {
     });
 
     socket.on('typing', ({ roomCode, senderName, isTyping }) => {
-      socket.to(roomCode).emit('user_typing', { senderName, isTyping });
+      socket.to(roomCode).emit('user_typing', {
+        senderName,
+        senderSocketId: socket.id,
+        isTyping
+      });
     });
 
     socket.on('disconnect', () => {
       if (socket.currentRoom) {
         socket.to(socket.currentRoom).emit('user_left', {
           senderName: socket.senderName || 'Guest',
+          senderSocketId: socket.id,
           timestamp: new Date()
         });
       }

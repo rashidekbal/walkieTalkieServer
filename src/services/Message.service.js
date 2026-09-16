@@ -8,7 +8,7 @@ class MessageService {
     this.roomRepo = roomRepo;
   }
 
-  async sendMessage({ roomCode, senderName, content, type = 'text', mediaUrl = null, mediaPublicId = null, fileMeta = {} }) {
+  async sendMessage({ roomCode, senderName, senderSocketId = null, content, type = 'text', mediaUrl = null, mediaPublicId = null, fileMeta = {} }) {
     if (!roomCode || !validateRoomCode(roomCode)) {
       const err = new Error('Invalid 8-character room code.');
       err.statusCode = 400;
@@ -27,6 +27,7 @@ class MessageService {
     const savedMessage = await this.messageRepo.create({
       roomCode,
       senderName: senderName || 'Guest',
+      senderSocketId,
       type,
       content: content || '',
       mediaUrl,

@@ -47,6 +47,7 @@ async function initDb() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         room_code VARCHAR(8) NOT NULL,
         sender_name VARCHAR(100) NOT NULL DEFAULT 'Guest',
+        sender_socket_id VARCHAR(100) DEFAULT NULL,
         type ENUM('text', 'image', 'file') DEFAULT 'text',
         content TEXT,
         media_url TEXT,
@@ -59,6 +60,12 @@ async function initDb() {
         FOREIGN KEY (room_code) REFERENCES walkietalkie_rooms(code) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    try {
+      await pool.query(`ALTER TABLE walkietalkie_messages ADD COLUMN sender_socket_id VARCHAR(100) DEFAULT NULL;`);
+    } catch (e) {
+      // Column already exists
+    }
 
     console.log('[MySQL] Connected! Live tables (walkietalkie_rooms, walkietalkie_messages) initialized successfully.');
   } catch (error) {
