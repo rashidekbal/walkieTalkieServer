@@ -18,7 +18,7 @@ class MessageRepository {
 
     try {
       const sql = `
-        INSERT INTO messages 
+        INSERT INTO walkietalkie_messages 
         (room_code, sender_name, type, content, media_url, media_public_id, file_name, file_size, mime_type)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
@@ -68,7 +68,7 @@ class MessageRepository {
 
   async findByRoomCode(roomCode, limit = 100) {
     try {
-      const sql = 'SELECT * FROM messages WHERE room_code = ? ORDER BY created_at ASC LIMIT ?';
+      const sql = 'SELECT * FROM walkietalkie_messages WHERE room_code = ? ORDER BY created_at ASC LIMIT ?';
       const [rows] = await pool.execute(sql, [roomCode, limit]);
       if (rows && rows.length > 0) {
         return rows;
@@ -81,7 +81,7 @@ class MessageRepository {
 
   async deleteByRoomCode(roomCode) {
     try {
-      const sql = 'DELETE FROM messages WHERE room_code = ?';
+      const sql = 'DELETE FROM walkietalkie_messages WHERE room_code = ?';
       const [result] = await pool.execute(sql, [roomCode]);
       this.memoryStorage = this.memoryStorage.filter(m => m.room_code !== roomCode);
       return result.affectedRows > 0;

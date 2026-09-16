@@ -8,7 +8,7 @@ class RoomRepository {
   async create(roomData) {
     try {
       const { code, title = 'General Room' } = roomData;
-      const sql = 'INSERT INTO rooms (code, title) VALUES (?, ?)';
+      const sql = 'INSERT INTO walkietalkie_rooms (code, title) VALUES (?, ?)';
       await pool.execute(sql, [code, title]);
       return this.findByCode(code);
     } catch (err) {
@@ -26,7 +26,7 @@ class RoomRepository {
 
   async findByCode(code) {
     try {
-      const sql = 'SELECT * FROM rooms WHERE code = ? LIMIT 1';
+      const sql = 'SELECT * FROM walkietalkie_rooms WHERE code = ? LIMIT 1';
       const [rows] = await pool.execute(sql, [code]);
       if (rows && rows.length > 0) {
         return rows[0];
@@ -39,7 +39,7 @@ class RoomRepository {
 
   async updateLastActive(code) {
     try {
-      const sql = 'UPDATE rooms SET last_active_at = NOW() WHERE code = ?';
+      const sql = 'UPDATE walkietalkie_rooms SET last_active_at = NOW() WHERE code = ?';
       await pool.execute(sql, [code]);
       return this.findByCode(code);
     } catch (err) {
@@ -53,7 +53,7 @@ class RoomRepository {
 
   async deleteByCode(code) {
     try {
-      const sql = 'DELETE FROM rooms WHERE code = ?';
+      const sql = 'DELETE FROM walkietalkie_rooms WHERE code = ?';
       const [result] = await pool.execute(sql, [code]);
       this.memoryStorage.delete(code);
       return result.affectedRows > 0;

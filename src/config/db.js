@@ -29,8 +29,9 @@ async function initDb() {
   try {
     console.log(`[MySQL] Connecting to ${host}:${port} (${database})...`);
 
+    // 1. Create walkietalkie_rooms table
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS rooms (
+      CREATE TABLE IF NOT EXISTS walkietalkie_rooms (
         id INT AUTO_INCREMENT PRIMARY KEY,
         code VARCHAR(8) NOT NULL UNIQUE,
         title VARCHAR(255) DEFAULT 'General Room',
@@ -40,8 +41,9 @@ async function initDb() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
+    // 2. Create walkietalkie_messages table
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS messages (
+      CREATE TABLE IF NOT EXISTS walkietalkie_messages (
         id INT AUTO_INCREMENT PRIMARY KEY,
         room_code VARCHAR(8) NOT NULL,
         sender_name VARCHAR(100) NOT NULL DEFAULT 'Guest',
@@ -54,11 +56,11 @@ async function initDb() {
         mime_type VARCHAR(100),
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_room_code (room_code),
-        FOREIGN KEY (room_code) REFERENCES rooms(code) ON DELETE CASCADE
+        FOREIGN KEY (room_code) REFERENCES walkietalkie_rooms(code) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
 
-    console.log('[MySQL] Connected! Live cloud database tables initialized successfully.');
+    console.log('[MySQL] Connected! Live tables (walkietalkie_rooms, walkietalkie_messages) initialized successfully.');
   } catch (error) {
     console.warn('[MySQL Warning] Connection or table initialization error:', error.message);
   }
